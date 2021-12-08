@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:sharding="http://shardingsphere.apache.org/schema/shardingsphere/sharding"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://shardingsphere.apache.org/schema/shardingsphere/sharding
+                        http://shardingsphere.apache.org/schema/shardingsphere/sharding/sharding.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd
+                        http://www.springframework.org/schema/tx
+                        http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!-- 分片数据库数据源 -->
+    <bean id="ds0" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="username" value="test"/>
+        <property name="password" value="root"/>
+        <property name="jdbcUrl" value="jdbc:mysql://172.16.1.147:3306/sharding?characterEncoding=UTF-8&amp;autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;serverTimezone=GMT"/>
+    </bean>
+    <!-- 分片数据库数据源 -->
+    <bean id="ds1" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="username" value="test"/>
+        <property name="password" value="root"/>
+        <property name="jdbcUrl" value="jdbc:mysql://172.16.1.147:3306/sharding-order-1?characterEncoding=UTF-8&amp;autoReconnect=true&amp;zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;serverTimezone=GMT"/>
+    </bean>
+    <!-- 分片规则 -->
+    <sharding:data-source id="sharding-data-source">
+        <sharding:sharding-rule data-source-names="ds0,ds1">
+            <sharding:table-rules>
+                <!-- 逻辑表的名称要和mybatis中xml的表要对应 实际数据节点和表要和数据库对应-->
+                <sharding:table-rule logic-table="t_order" actual-data-nodes="ds$->{0..1}.t_order_$->{1..2}"
+                database-strategy-ref="databaseStrategy" table-strategy-ref="tableStrategy"/>
+            </sharding:table-rules>
+            <sharding:broadcast-table-rules>
+                <sharding:broadcast-table-rule table="area"/>
+            </sharding:broadcast-table-rules>
+        </sharding:sharding-rule>
+    </sharding:data-source>
+    <!-- 数据库分片规则 根据user_id取模决定数据存放到哪个数据库-->
+    <sharding:inline-strategy id="databaseStrategy" sharding-column="user_id"
+                              algorithm-expression="ds$->{user_id % 2}"/>
+    <!-- 表分片规则 根据主键id取模决定数据存放到哪个表-->
+    <sharding:inline-strategy id="tableStrategy" sharding-column="id"
+                              algorithm-expression="t_order_$->{id % 2 + 1}"/>
+
+
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="sharding-data-source"/>
+        <property name="mapperLocations" value="classpath*:/mybatis/*.xml"/>
+    </bean>
+</beans>

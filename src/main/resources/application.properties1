@@ -1,0 +1,31 @@
+#spring.shardingsphere.datasource.names=ds0,ds1
+#
+#spring.shardingsphere.datasource.ds0.type=com.zaxxer.hikari.HikariDataSource
+#spring.shardingsphere.datasource.ds0.driver-class-name=com.mysql.cj.jdbc.Driver
+#spring.shardingsphere.datasource.ds0.jdbcUrl=jdbc:mysql://172.16.1.147:3306/sharding?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true&serverTimezone=GMT
+#spring.shardingsphere.datasource.ds0.username=test
+#spring.shardingsphere.datasource.ds0.password=root
+#
+#spring.shardingsphere.datasource.ds1.type=com.zaxxer.hikari.HikariDataSource
+#spring.shardingsphere.datasource.ds1.driver-class-name=com.mysql.cj.jdbc.Driver
+#spring.shardingsphere.datasource.ds1.jdbcUrl=jdbc:mysql://172.16.1.147:3306/sharding-order-1?characterEncoding=UTF-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&useUnicode=true&serverTimezone=GMT
+#spring.shardingsphere.datasource.ds1.username=test
+#spring.shardingsphere.datasource.ds1.password=root
+#
+##全局表 每一个库都有的表 避免跨库查询影响性能
+#spring.shardingsphere.sharding.broadcast-tables=area
+##分片策略
+#spring.shardingsphere.sharding.tables.t_order.actual-data-nodes=ds$->{0..1}.t_order_$->{1..2}
+#spring.shardingsphere.sharding.tables.t_order.database-strategy.inline.sharding-column=user_id
+#spring.shardingsphere.sharding.tables.t_order.database-strategy.inline.algorithm-expression=ds$->{user_id % 2}
+#spring.shardingsphere.sharding.tables.t_order.table-strategy.inline.sharding-column=id
+#spring.shardingsphere.sharding.tables.t_order.table-strategy.inline.algorithm-expression=t_order_$->{id % 2 + 1}
+##主键生成策略
+##spring.shardingsphere.sharding.tables.t_order.key-generator.column=id
+##spring.shardingsphere.sharding.tables.t_order.key-generator.type=
+#
+##spring.shardingsphere.sharding.tables.t_order_item.actual-data-nodes=ds$->{0..1}.t_order_item$->{0..1}
+##spring.shardingsphere.sharding.tables.t_order_item.table-strategy.inline.sharding-column=order_id
+##spring.shardingsphere.sharding.tables.t_order_item.table-strategy.inline.algorithm-expression=t_order_item$->{order_id % 2}
+#
+#mybatis.mapper-locations=/mybatis/*.xml

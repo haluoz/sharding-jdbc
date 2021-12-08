@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: stream-test
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      bindings:
+        inputStartExamCallBack:
+          #指定输入通道对应的主题名
+          destination: minestream
+        outputStartExamCallBack:
+          destination: minestream
