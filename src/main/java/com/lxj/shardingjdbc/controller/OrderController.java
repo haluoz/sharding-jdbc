@@ -5,6 +5,7 @@ import com.lxj.shardingjdbc.log.LogRecord;
 import com.lxj.shardingjdbc.log.LogRecordContext;
 import com.lxj.shardingjdbc.model.Order;
 import com.lxj.shardingjdbc.mq.Producer;
+import com.lxj.shardingjdbc.mq.ProducerSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.MessageBuilder;
@@ -23,7 +24,7 @@ public class OrderController {
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private Producer producer;
+    private ProducerSource producer;
 
     @LogRecord(bizNo = "", success = "'修改成功，用户：' + #operator + '修改订单id：' + #reqOrder.id +'，修改订单金额' + #reqOrder.orderAmount")
     @GetMapping("/modifyAmount")
@@ -57,8 +58,7 @@ public class OrderController {
 
     @GetMapping("send")
     public void send() {
-        log.info("sending message");
-        producer.outputStartExamCallBack().send(MessageBuilder.withPayload("Hello World...").build());
+        producer.outputStartExamCallBack("hello world");
     }
 }
 

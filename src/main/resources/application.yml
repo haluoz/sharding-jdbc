@@ -12,5 +12,12 @@ spring:
         inputStartExamCallBack:
           #指定输入通道对应的主题名
           destination: minestream
+          binder: rabbit
+          group: startExam
         outputStartExamCallBack:
           destination: minestream
+          binder: rabbit
+          prefetch: 1
+          consumer:
+            concurrency: 2    #消费者个数
+          group: startExam
